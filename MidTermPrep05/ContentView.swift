@@ -5,25 +5,27 @@
  */
 import SwiftUI
 
-struct Item {
+struct Menu{
     var dish: String
     var ImgName: String
     var price: Double
 }
 
 struct Order {
-    var foodItems: Item
+    var foodItems: Menu
     var unit: Int
 }
 
-private let items = [
-    Item(dish: "Juicy Cheese Burger", ImgName: "Hamburger", price: 39.99),
-    Item(dish: "American Fries", ImgName: "Fries", price: 59.99)
+private let menu = [
+    Menu(dish: "Juicy Cheese Burger", ImgName: "Hamburger", price: 39.99),
+    Menu(dish: "American Fries", ImgName: "Fries", price: 59.99)
 ]
 
 struct ContentView: View {
     @State private var INDEX = 0
-    @State private var totalAmount = 0.0
+    @State private var orders: [Order] = []
+    @State private var receipt = "Total Payment: $0.0"
+    @State private var totalAmt = 0.0
     @State private var unitStr = "1"
     
     var body: some View {
@@ -33,11 +35,11 @@ struct ContentView: View {
             Color.orange.ignoresSafeArea()
             
             VStack {
-                Image(items[INDEX].ImgName)
+                Image(menu[INDEX].ImgName)
                     .resizable()
                     .scaledToFit()
                     .padding(20)
-                Text("\(items[INDEX].dish)")
+                Text("\(menu[INDEX].dish)")
                     .padding()
                 HStack {
                     Text("Quantity: ")
@@ -46,7 +48,7 @@ struct ContentView: View {
                 }
                 
                 Button("Next Item") {
-                    if INDEX < items.count - 1 {
+                    if INDEX < menu.count - 1 {
                         INDEX = INDEX + 1
                         print(INDEX)
                     } else {
@@ -57,11 +59,32 @@ struct ContentView: View {
                 .buttonStyle(.borderedProminent)
                 .font(.caption)
                 .padding()
+                
+                Button("Place Order") {
+                    let unit = Int(unitStr)
+                    let menu = menu[INDEX]
+                    let order = Order(foodItems: menu, unit: unit!)
+                    orders.append(order)
+                    receipt = ""
+                    totalAmt = 0.0
+                    
+                    for item in orders {
+                        totalAmt = totalAmt + item.foodItems.price * Double(item.unit)
+                        receipt = receipt + "\n \(item.foodItems.dish) X \(item.unit): $\(item.foodItems.price * Double(item.unit))"
+                    }
+                    
+                    receipt = receipt + "\n Total Amount: $\(totalAmt.formatted())"
+                }
+                .font(.caption)
+                .buttonStyle(.borderedProminent)
+                .padding()
+            Text(receipt)
+                .padding()
             }
         }
     }
 }
-
+    
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
